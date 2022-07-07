@@ -1,5 +1,6 @@
 package com.example.taskorganizer;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlarmManager;
@@ -17,8 +18,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -27,14 +30,16 @@ import java.util.Date;
 import java.util.Locale;
 
 public class AddTaskActivity extends AppCompatActivity {
-    private Button timeButton, dateButton, addTaskButton;
+    private Button timeButton, dateButton, addTaskButton, browseButton;
     private DatePickerDialog datePickerDialog;
     int year, month, day, hour, minute;
     EditText title_input, description_input, category_input;
+    CheckBox notificationOnOff;
     private AlarmManager alarmManager;
     private PendingIntent pendingIntent;
     private Calendar notificationTime;
     private String timeOfCreation;
+    private TextView addAttachment;
 
 
     @Override
@@ -44,11 +49,17 @@ public class AddTaskActivity extends AppCompatActivity {
         initDatePicker();
 
         dateButton = findViewById(R.id.datePickerButton);
+        addAttachment = findViewById(R.id.addAttachment);
+        browseButton = findViewById(R.id.browseButton);
+        browseButton.setOnClickListener(view -> {
+            callChooseFileFromDevice();
+        });
         timeButton = findViewById(R.id.selectTime);
         title_input = findViewById(R.id.title);
         description_input = findViewById(R.id.description);
         category_input = findViewById(R.id.category);
-        addTaskButton = findViewById(R.id.saveTask);
+        notificationOnOff = findViewById(R.id.checkboxNotification);
+        addTaskButton = findViewById(R.id.saveTask1);
         addTaskButton.setOnClickListener(view -> {
             getDateAndTimeNow();
             getTimeAndDateFromUserToCalendar();
@@ -58,9 +69,15 @@ public class AddTaskActivity extends AppCompatActivity {
                     , description_input.getText().toString().trim(),
                     category_input.getText().toString().trim(),
                     timeOfCreation,
-                    convertCalendarToDate(notificationTime));
+                    convertCalendarToDate(notificationTime),
+                    "none",
+                    addAttachment.getText().toString().trim());
 
-            setAlarm();
+            if(notificationOnOff.isChecked()){
+                setAlarm();
+            }
+
+
             Intent i = new Intent(AddTaskActivity.this, MainActivity.class);
             startActivity(i);
             finish();
@@ -68,6 +85,27 @@ public class AddTaskActivity extends AppCompatActivity {
 
         createNotificationChannel();
 
+    }
+
+    private void callChooseFileFromDevice(){
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, 10);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 10:
+                if (resultCode == RESULT_OK) {
+                    String path = data.getData().getPath();
+                    addAttachment.setText(path);
+                }
+                break;
+
+        }
     }
 
     private String convertCalendarToDate(Calendar calendar){
@@ -84,6 +122,7 @@ public class AddTaskActivity extends AppCompatActivity {
         notificationTime.set(Calendar.DAY_OF_MONTH, day);
         notificationTime.set(Calendar.MONTH, month);
         notificationTime.set(Calendar.YEAR, year);
+        System.out.println(year);
     }
 
     private void getDateAndTimeNow(){
@@ -133,19 +172,21 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     public void initDatePicker(){
-        DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                month = month + 1;
-                String date = makeDateString(day, month, year);
-                dateButton.setText(date);
-            }
-        };
 
         Calendar cal = Calendar.getInstance();
         year = cal.get(Calendar.YEAR);
         month = cal.get(Calendar.MONTH);
         day = cal.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog.OnDateSetListener dateSetListener = (datePicker, year, month, day) -> {
+            month = month + 1;
+            String date = makeDateString(day, month, year);
+            this.year = year;
+            this.month = month;
+            this.day = day;
+            dateButton.setText(date);
+        };
+
 
         int style = AlertDialog.THEME_HOLO_LIGHT;
         datePickerDialog = new DatePickerDialog(this, style, dateSetListener, year, month, day );
@@ -155,36 +196,6 @@ public class AddTaskActivity extends AppCompatActivity {
 
     private String makeDateString(int day, int month, int year){
         return month + " " + day + " " + year;
-    }
-
-    private String getMonthFormat(int month)
-    {
-        if(month == 1)
-            return "JAN";
-        if(month == 2)
-            return "FEB";
-        if(month == 3)
-            return "MAR";
-        if(month == 4)
-            return "APR";
-        if(month == 5)
-            return "MAY";
-        if(month == 6)
-            return "JUN";
-        if(month == 7)
-            return "JUL";
-        if(month == 8)
-            return "AUG";
-        if(month == 9)
-            return "SEP";
-        if(month == 10)
-            return "OCT";
-        if(month == 11)
-            return "NOV";
-        if(month == 12)
-            return "DEC";
-
-        return "JAN";
     }
 
     public void openDatePicker(View view){

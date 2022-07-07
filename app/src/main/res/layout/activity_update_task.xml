@@ -56,6 +56,15 @@
         android:textSize="20sp">
     </TextView>
 
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Task status: "
+        android:layout_marginTop="10dp"
+        android:textSize="20sp">
+    </TextView>
+
 
     <TextView
         android:id="@+id/addAttachment_input"
@@ -70,8 +79,7 @@
         android:id="@+id/browseButton_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Browse Files"
-        android:onClick="openDatePicker"
+        android:text="Open Attachment"
         android:layout_marginTop="10dp"
 
         >
@@ -101,5 +109,13 @@
 
         >
     </Button>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:background="@color/purple_500">
+    </ImageView>
 
 </LinearLayout>

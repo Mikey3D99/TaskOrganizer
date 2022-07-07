@@ -50,8 +50,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
         holder.task_title_txt.setText(task.get(position).getTaskName());
         holder.task_description_txt.setText(task.get(position).getDescription());
 
-        String taskStatus =  task.get(position).getFinished() ? "finished" : "unfinished";
-        holder.task_status_txt.setText(taskStatus);
+        holder.task_category_txt.setText(task.get(position).getCategory());
 
         holder.mainLayout.setOnClickListener(view -> {
             Intent intent = new Intent(context, UpdateTaskActivity.class);
@@ -68,7 +67,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
     // here is a single task in a recyclerview
     public static class MyViewHolder extends RecyclerView.ViewHolder{
 
-        TextView task_id_txt, task_title_txt, task_description_txt, task_status_txt;
+        TextView task_id_txt, task_title_txt, task_description_txt, task_category_txt;
         LinearLayout mainLayout;
 
         public MyViewHolder(@NonNull View itemView) {
@@ -76,7 +75,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
             task_id_txt = itemView.findViewById(R.id.taskID);
             task_title_txt = itemView.findViewById(R.id.taskTitle);
             task_description_txt = itemView.findViewById(R.id.taskDescription);
-            task_status_txt = itemView.findViewById(R.id.taskStatus);
+            task_category_txt = itemView.findViewById(R.id.taskStatus);
             mainLayout = itemView.findViewById(R.id.mainLayout);
         }
     }

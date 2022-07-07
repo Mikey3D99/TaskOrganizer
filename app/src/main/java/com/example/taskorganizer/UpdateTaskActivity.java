@@ -2,26 +2,50 @@ package com.example.taskorganizer;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class UpdateTaskActivity extends AppCompatActivity {
 
-    EditText title_input, description_input, status_input;
+    EditText title_input, description_input, category_input;
     Button update_button, delete_button;
-    String id, title, description, status, time_creation, time_execution;
-    TextView timeOfCreation, timeOfExecution;
+    String id, title, description, status, time_creation, time_execution, attachment;
+    TextView timeOfCreation, timeOfExecution, taskStatus, attachmentView;
     ArrayList<String> creationTime, executionTime;
     ArrayList<TaskModel> myTasks;
     TaskModel updateTask;
     MyDatabaseHelper myDB;
+    CheckBox notificationOnOff;
+    private Calendar notificationTime;
+    int year, month, day, hour, minute;
+    private AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
+    private ImageView myImage;
+    OutputStream outputStream;
 
 
     @Override
@@ -32,10 +56,15 @@ public class UpdateTaskActivity extends AppCompatActivity {
         // finding different UI elements ---
         title_input = findViewById(R.id.title_input);
         description_input = findViewById(R.id.description_input);
-        status_input = findViewById(R.id.category_input);
+        category_input = findViewById(R.id.category_input);
         update_button = findViewById(R.id.saveTask);
         timeOfCreation = findViewById(R.id.timeOfCreation);
         timeOfExecution = findViewById(R.id.timeOfExecution);
+        notificationOnOff = findViewById(R.id.checkboxNotification_input);
+        taskStatus = findViewById(R.id.status);
+        attachmentView = findViewById(R.id.addAttachment_input);
+        myImage = findViewById(R.id.imageView);
+
         //----------------------------------------------------
 
         myDB = new MyDatabaseHelper(UpdateTaskActivity.this);
@@ -44,13 +73,19 @@ public class UpdateTaskActivity extends AppCompatActivity {
         myTasks = new ArrayList<>();
 
 
+        // Task model loaded here
         getAndSetIntentData();
+
         update_button.setOnClickListener(view -> {
             MyDatabaseHelper myDB = new MyDatabaseHelper(UpdateTaskActivity.this);
             title = title_input.getText().toString().trim();
             description = description_input.getText().toString().trim();
-            status = status_input.getText().toString().trim();
+            status = category_input.getText().toString().trim();
             myDB.updateData(id, title, description, status);
+
+            if(notificationOnOff.isChecked()){
+                setAlarm();
+            }
 
         });
 
@@ -59,17 +94,87 @@ public class UpdateTaskActivity extends AppCompatActivity {
             confirmDialog();
         });
 
+        Retrieve( updateTask.attachmentFileName);
+
+    }
+
+    private void getExecutionTimeToCalendar(){
+        notificationTime = Calendar.getInstance();
+        notificationTime.setTime(updateTask.execution);
+    }
+
+    private void setAlarm(){
+        getExecutionTimeToCalendar();
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                notificationTime.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY,
+                pendingIntent);
+
+
+        Toast.makeText(this, "Notification Set!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void Retrieve(String path)
+    {
+        File imageFile = new File(Environment.getDataDirectory() + path);
+
+        if(imageFile.exists()){
+
+            Bitmap myBitmap = BitmapFactory.decodeFile(path);
+            myImage = (ImageView) findViewById(R.id.imageView);
+            myImage.setImageBitmap(BitmapFactory.decodeFile(path));
+
+        }
+        else{
+            Toast.makeText(getApplicationContext(), "GOWNO" + Environment.getDataDirectory() + path, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void saveImageToExternal(){
+        if(this.updateTask.attachmentFileName.contains("image:")){
+            BitmapDrawable drawable = (BitmapDrawable) myImage.getDrawable();
+            Bitmap bitmap = drawable.getBitmap();
+
+            File filepath = Environment.getExternalStorageDirectory();
+            File dir = new File(filepath.getAbsolutePath() + this.updateTask.attachmentFileName);
+            dir.mkdir();
+            File file = new File(dir, System.currentTimeMillis() + ".jpg");
+            try {
+                outputStream = new FileOutputStream(file);
+            }catch(FileNotFoundException e){
+                e.printStackTrace();
+            }
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            Toast.makeText(getApplicationContext(), "Image saved to external storage", Toast.LENGTH_SHORT).show();
+            try {
+                outputStream.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    void setTaskStatus(){
+        Date dateNow = new Date();
+        int compare = dateNow.compareTo(updateTask.execution);
+        if(compare > 0 || compare == 0){
+            this.updateTask.setFinished(true);
+        }
     }
 
     void getAndSetIntentData(){
         if(getIntent().hasExtra("task")){
 
             //GETTING DATA FROM INTENT
-            id = getIntent().getStringExtra("id");
-            title = getIntent().getStringExtra("title");
-            description = getIntent().getStringExtra("description");
-            status = getIntent().getStringExtra("status");
-
             Bundle extras = getIntent().getExtras();
             if(extras != null){
                 updateTask = (TaskModel) extras.getSerializable("task");
@@ -78,10 +183,13 @@ public class UpdateTaskActivity extends AppCompatActivity {
             //SETTING DATA
             title_input.setText(updateTask.getTaskName());
             description_input.setText(updateTask.getDescription());
-            String taskStatus = updateTask.getFinished() ? "finished" : "unfinished";
-            status_input.setText(taskStatus);
+            category_input.setText(updateTask.getCategory());
             timeOfCreation.setText( "Creation time: " + updateTask.getTimeOfCreation());
             timeOfExecution.setText("Execution time: " + updateTask.getTimeOfExecution());
+            attachmentView.setText("Attachment file: " + updateTask.attachmentFileName);
+            //check if task finished
+            setTaskStatus();
+            taskStatus.setText(updateTask.getFinished() ? "Task status: finished" : "Task status: unfinished");
         }
         else{
             Toast.makeText(this, "No data", Toast.LENGTH_SHORT).show();
@@ -90,28 +198,15 @@ public class UpdateTaskActivity extends AppCompatActivity {
 
     void confirmDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete " + title + "?");
-        builder.setMessage("Are you sure you want to delete " + title + "?");
+        builder.setTitle("Delete " + updateTask.getTaskName() + "?");
+        builder.setMessage("Are you sure you want to delete " + updateTask.getTaskName() + "?");
         builder.setPositiveButton("Yes", (dialogInterface, i) -> {
             MyDatabaseHelper myDB = new MyDatabaseHelper(UpdateTaskActivity.this);
-            myDB.deleteOneRow(id);
+            myDB.deleteOneRow(updateTask.getTaskID());
             finish();
         });
         builder.setNegativeButton("No", (dialogInterface, i) -> {});
         builder.create().show();
-    }
-
-    void getArrayData(){
-        Cursor cursor = myDB.readAllData();
-        if(cursor.getCount() == 0){
-            Toast.makeText(this, "No data!", Toast.LENGTH_SHORT).show();
-        }
-        else{
-            while(cursor.moveToNext()){
-                creationTime.add(cursor.getString(4));
-                executionTime.add(cursor.getString(5));
-            }
-        }
     }
 
     void getCertainRowByID(String ID){

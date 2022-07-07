@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#454545"
+    android:orientation="vertical"
+    tools:context=".SettingsActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-thin"
+        android:gravity="center"
+        android:text="SETTINGS"
+        android:textSize="50dp"
+        android:textColor="@color/white">
+    </TextView>
+
+
+    <EditText
+        android:id="@+id/minutesBeforeNotification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/white"
+        android:hint="Type amount of how many minutes before notify"
+        android:textColorHint="#939292"
+        app:layout_constraintBottom_toTopOf="@id/taskList"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/setMinutesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="8dp"
+        android:backgroundTint="@color/white"
+        android:text="save"
+        android:textColor="#404040" />
+
+    <Button
+        android:id="@+id/hideFinished"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="8dp"
+        android:backgroundTint="@color/white"
+        android:text="hide finished tasks"
+        android:textColor="#404040" />
+
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-thin"
+        android:gravity="center"
+        android:layout_marginTop="20dp"
+        android:text="SHOW CATEGORY"
+        android:textSize="30dp"
+        android:textColor="@color/white">
+    </TextView>
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="15dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp">
+
+        <ScrollView
+            android:id="@+id/categoryList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp">
+
+        </ScrollView>
+
+
+    </androidx.cardview.widget.CardView>
+
+
+</LinearLayout>

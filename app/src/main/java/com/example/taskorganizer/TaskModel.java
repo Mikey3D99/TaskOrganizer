@@ -1,9 +1,12 @@
 package com.example.taskorganizer;
 
+import android.icu.text.SimpleDateFormat;
+
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
 
-public class TaskModel implements Serializable {
+public class TaskModel implements Serializable, Comparable<TaskModel> {
     String taskID;
     String taskName;
     String description;
@@ -13,12 +16,14 @@ public class TaskModel implements Serializable {
     Boolean notification; // on or off
     String category;
     String attachmentFileName;
+    String currentCategory;
+    Date execution;
 
 
 
 
     public TaskModel(String taskID, String taskName, String description, String category, String timeOfCreation, String timeOfExecution,
-                     Boolean finished, Boolean notification) {
+                     Boolean finished, Boolean notification, String currentCategory, String attachmentFileName) throws ParseException {
         this.taskID = taskID;
         this.taskName = taskName;
         this.description = description;
@@ -27,7 +32,10 @@ public class TaskModel implements Serializable {
         this.finished = finished;
         this.notification = notification;
         this.category = category;
-        //this.attachmentFileName = attachmentFileName;
+        this.currentCategory = currentCategory;
+
+        this.execution = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(timeOfExecution);
+        this.attachmentFileName = attachmentFileName;
     }
 
     public String getTaskID() {
@@ -100,5 +108,10 @@ public class TaskModel implements Serializable {
 
     public void setAttachmentFileName(String attachmentFileName) {
         this.attachmentFileName = attachmentFileName;
+    }
+
+    @Override
+    public int compareTo(TaskModel taskModel) {
+        return execution.compareTo(taskModel.execution);
     }
 }
