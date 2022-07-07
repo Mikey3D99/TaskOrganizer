@@ -1,5 +1,6 @@
 package com.example.taskorganizer;
 
+import androidx.annotation.ArrayRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -8,21 +9,26 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     FloatingActionButton addTask;
     RecyclerView recyclerView;
     MyDatabaseHelper myDB;
-    ArrayList<String> task_id, task_title, task_description, task_category;
+    ArrayList<TaskModel> myTasks;
+    EditText searchTask;
     CustomAdapter customAdapter;
 
     @Override
@@ -31,6 +37,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         addTask = findViewById(R.id.addTaskButton);
+        searchTask = findViewById(R.id.search);
+        searchTask.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                filter(s.toString());
+            }
+        });
+
         recyclerView = findViewById(R.id.taskList);
         addTask.setOnClickListener(view -> {
             Intent i = new Intent(MainActivity.this, AddTaskActivity.class);
@@ -39,20 +63,25 @@ public class MainActivity extends AppCompatActivity {
         });
 
         myDB = new MyDatabaseHelper(MainActivity.this);
-        task_category = new ArrayList<>();
-        task_description = new ArrayList<>();
-        task_id = new ArrayList<>();
-        task_title = new ArrayList<>();
+        myTasks = new ArrayList<>();
 
         storeDataInArrays();
 
-        customAdapter = new CustomAdapter(MainActivity.this, this, task_id,
-                task_title,
-                task_description,
-                task_category);
+        customAdapter = new CustomAdapter(MainActivity.this, this, myTasks);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
     }
+
+    private void filter(String text){
+        ArrayList<TaskModel> filteredList = new ArrayList<>();
+        for(TaskModel task : myTasks){
+            if(task.getTaskName().toLowerCase().contains(text.toLowerCase())){
+                filteredList.add(task);
+            }
+        }
+        customAdapter.filterList(filteredList);
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -69,10 +98,19 @@ public class MainActivity extends AppCompatActivity {
         }
         else{
             while(cursor.moveToNext()){
-                task_id.add(cursor.getString(0));
-                task_title.add(cursor.getString(1));
-                task_description.add(cursor.getString(2));
-                task_category.add(cursor.getString(3));
+
+                //adding task to an arraylist
+                TaskModel task = new TaskModel(
+                        cursor.getString(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getString(3),
+                        cursor.getString(4),
+                        cursor.getString(5),
+                        false,
+                        true);
+
+                myTasks.add(task);
             }
         }
     }

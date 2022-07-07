@@ -1,5 +1,6 @@
 package com.example.taskorganizer;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -21,6 +22,8 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_TITLE = "task_title";
     private static final String COLUMN_DESCRIPTION = "task_description";
     private static final String COLUMN_CATEGORY = "task_category";
+    private static final String COLUMN_TIME_CREATION = "task_creation";
+    private static final String COLUMN_TIME_EXECUTION = "task_execution";
 
 
 
@@ -37,7 +40,9 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
                         " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         COLUMN_TITLE + " TEXT, " +
                         COLUMN_DESCRIPTION + " TEXT, " +
-                        COLUMN_CATEGORY + " TEXT);";
+                        COLUMN_CATEGORY + " TEXT, " +
+                        COLUMN_TIME_CREATION + " TEXT, " +
+                        COLUMN_TIME_EXECUTION + " TEXT);";
         db.execSQL(query);
     }
 
@@ -47,13 +52,17 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    void addTask(String title, String description, String category){
+    void addTask(String title, String description, String category, String time_creation,
+                 String time_execution){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
         cv.put(COLUMN_TITLE, title);
         cv.put(COLUMN_DESCRIPTION, description);
         cv.put(COLUMN_CATEGORY, category);
+        cv.put(COLUMN_TIME_CREATION, time_creation);
+        cv.put(COLUMN_TIME_EXECUTION, time_execution);
+
         long result = db.insert(TABLE_NAME, null, cv);
         if(result == -1)
             Toast.makeText(context, "failed database add task", Toast.LENGTH_SHORT).show();
@@ -62,7 +71,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     }
 
     Cursor readAllData(){
-        String query = "SELECT * FROM " + TABLE_NAME;
+        String query = "select * from " + TABLE_NAME;
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = null;
@@ -72,7 +81,22 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    void updateData(String row_id, String title, String description, String status){
+    Cursor readRowWithAnID(String id){
+        String query = "select * from " + TABLE_NAME + " WHERE _id = " + id;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        if(db != null){
+            cursor = db.rawQuery(query, null );
+        }
+        return cursor;
+    }
+
+    void updateData(String row_id,
+                    String title,
+                    String description,
+                    String status
+                    ){
+
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_TITLE, title);
@@ -87,5 +111,17 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
             Toast.makeText(context, "Successfully updated!", Toast.LENGTH_SHORT).show();
         }
 
+
+    }
+
+    void deleteOneRow(String row_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        long result = db.delete(TABLE_NAME, "_id=?", new String[]{row_id});
+        if(result == -1){
+            Toast.makeText(context, "Failed to delete", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            Toast.makeText(context, "Successfully deleted!", Toast.LENGTH_SHORT).show();
+        }
     }
 }

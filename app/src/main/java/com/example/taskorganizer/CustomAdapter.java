@@ -13,28 +13,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.utils.ViewUtils;
-
 import java.util.ArrayList;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHolder> {
 
     Context context;
-    private ArrayList task_id, task_title, task_description, task_status;
+    private ArrayList<TaskModel> task;
     Activity activity;
 
 
     CustomAdapter(Activity activity, Context context,
-                  ArrayList task_id,
-                  ArrayList task_title,
-                  ArrayList task_status,
-                  ArrayList task_description){
+                  ArrayList<TaskModel> task){
         this.activity = activity;
         this.context = context;
-        this.task_id = task_id;
-        this.task_title = task_title;
-        this.task_status = task_status;
-        this.task_description = task_description;
+        this.task = task;
 
     }
 
@@ -48,26 +40,33 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
 
     @Override
     public void onBindViewHolder(@NonNull CustomAdapter.MyViewHolder holder, int position) {
-        holder.task_id_txt.setText(String.valueOf(task_id.get(position)));
+
+        /*holder.task_id_txt.setText(String.valueOf(task_id.get(position)));
         holder.task_title_txt.setText(String.valueOf(task_title.get(position)));
         holder.task_description_txt.setText(String.valueOf(task_description.get(position)));
-        holder.task_status_txt.setText(String.valueOf(task_status.get(position)));
+        holder.task_status_txt.setText(String.valueOf(task_status.get(position)));*/
+
+        holder.task_id_txt.setText(task.get(position).getTaskID());
+        holder.task_title_txt.setText(task.get(position).getTaskName());
+        holder.task_description_txt.setText(task.get(position).getDescription());
+
+        String taskStatus =  task.get(position).getFinished() ? "finished" : "unfinished";
+        holder.task_status_txt.setText(taskStatus);
+
         holder.mainLayout.setOnClickListener(view -> {
             Intent intent = new Intent(context, UpdateTaskActivity.class);
-            intent.putExtra("id", String.valueOf(task_id.get(position)));
-            intent.putExtra("title", String.valueOf(task_title.get(position)));
-            intent.putExtra("description", String.valueOf(task_description.get(position)));
-            intent.putExtra("status", String.valueOf(task_status.get(position)));
+            intent.putExtra("task", task.get(position));
             activity.startActivityForResult(intent, 1);
         });
     }
 
     @Override
     public int getItemCount() {
-        return task_id.size();
+        return task.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder{
+    // here is a single task in a recyclerview
+    public static class MyViewHolder extends RecyclerView.ViewHolder{
 
         TextView task_id_txt, task_title_txt, task_description_txt, task_status_txt;
         LinearLayout mainLayout;
@@ -81,4 +80,10 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHold
             mainLayout = itemView.findViewById(R.id.mainLayout);
         }
     }
+
+    public void filterList(ArrayList<TaskModel> filteredList){
+        task = filteredList;
+        notifyDataSetChanged();
+    }
+
 }

@@ -10,4 +10,9 @@
     <string name="enter_a_category">enter a category</string>
     <string name="notification">Notification</string>
     <string name="select_finish_time_and_date">Select finish time and date</string>
+    <string name="add_an_attachment">Add an attachment</string>
+    <string name="browse_files">Browse Files</string>
+    <string name="add_task">Add Task</string>
+    <string name="select_time">Select time</string>
+    <string name="select_date">Select date</string>
 </resources>

@@ -30,13 +30,6 @@
         >
     </EditText>
 
-    <CheckBox android:id="@+id/checkboxNotification"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/notification"
-        android:layout_marginTop="10dp"
-        />
-
 
     <TextView
         android:id="@+id/selectDateTime"
@@ -50,7 +43,7 @@
         android:id="@+id/selectTime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select time"
+        android:text="@string/select_time"
         android:onClick="popTimeClicker"
         android:layout_marginTop="10dp"
         >
@@ -61,18 +54,25 @@
         android:id="@+id/datePickerButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select date"
+        android:text="@string/select_date"
         android:onClick="openDatePicker"
         android:layout_marginTop="10dp"
         >
 
     </Button>
 
+    <CheckBox android:id="@+id/checkboxNotification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/notification"
+        android:layout_marginTop="10dp"
+        />
+
     <TextView
         android:id="@+id/addAttachment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add an attachment"
+        android:text="@string/add_an_attachment"
         android:layout_marginTop="10dp"
         android:textSize="20sp">
     </TextView>
@@ -81,7 +81,7 @@
         android:id="@+id/browseButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Browse Files"
+        android:text="@string/browse_files"
         android:onClick="openDatePicker"
         android:layout_marginTop="10dp"
 
@@ -93,7 +93,7 @@
         android:id="@+id/saveTask"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Task"
+        android:text="@string/add_task"
         android:onClick="openDatePicker"
         android:layout_marginTop="10dp"
 

@@ -2,16 +2,25 @@ package com.example.taskorganizer;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.icu.text.DateFormat;
+import android.icu.text.SimpleDateFormat;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -22,6 +31,10 @@ public class AddTaskActivity extends AppCompatActivity {
     private DatePickerDialog datePickerDialog;
     int year, month, day, hour, minute;
     EditText title_input, description_input, category_input;
+    private AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
+    private Calendar notificationTime;
+    private String timeOfCreation;
 
 
     @Override
@@ -37,26 +50,82 @@ public class AddTaskActivity extends AppCompatActivity {
         category_input = findViewById(R.id.category);
         addTaskButton = findViewById(R.id.saveTask);
         addTaskButton.setOnClickListener(view -> {
+            getDateAndTimeNow();
+            getTimeAndDateFromUserToCalendar();
+            //System.out.println(convertCalendarToDate(notificationTime) +  timeOfCreation);
             MyDatabaseHelper myDB = new MyDatabaseHelper(AddTaskActivity.this);
             myDB.addTask(title_input.getText().toString().trim()
                     , description_input.getText().toString().trim(),
-                    category_input.getText().toString().trim());
+                    category_input.getText().toString().trim(),
+                    timeOfCreation,
+                    convertCalendarToDate(notificationTime));
+
+            setAlarm();
             Intent i = new Intent(AddTaskActivity.this, MainActivity.class);
             startActivity(i);
             finish();
-
         });
+
+        createNotificationChannel();
 
     }
 
+    private String convertCalendarToDate(Calendar calendar){
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = calendar.getTime();
+        return formatter.format(date);
+    }
+
+    private void getTimeAndDateFromUserToCalendar(){
+        notificationTime = Calendar.getInstance();
+        notificationTime.set(Calendar.HOUR_OF_DAY, hour);
+        notificationTime.set(Calendar.MINUTE, minute);
+        notificationTime.set(Calendar.SECOND, 0);
+        notificationTime.set(Calendar.DAY_OF_MONTH, day);
+        notificationTime.set(Calendar.MONTH, month);
+        notificationTime.set(Calendar.YEAR, year);
+    }
+
+    private void getDateAndTimeNow(){
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        timeOfCreation = formatter.format(date);
+    }
+
+    private void createNotificationChannel() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            CharSequence name = "TaskOrganizerReminderChannel";
+            String description = "Channel for Alarm Manager";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel("TaskOrganizer", name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+
+    private void setAlarm(){
+        getTimeAndDateFromUserToCalendar();
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                notificationTime.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY,
+                pendingIntent);
+
+
+        Toast.makeText(this, "Notification Set!", Toast.LENGTH_SHORT).show();
+    }
+
     public void popTimeClicker(View view) {
-        TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                hour = selectedHour;
-                minute = selectedMinute;
-                timeButton.setText(String.format(Locale.getDefault(), "%02d:%02d", hour, minute));
-            }
+        TimePickerDialog.OnTimeSetListener onTimeSetListener = (timePicker, selectedHour, selectedMinute) -> {
+            hour = selectedHour;
+            minute = selectedMinute;
+            timeButton.setText(String.format(Locale.getDefault(), "%02d:%02d", hour, minute));
         };
         TimePickerDialog timePickerDialog = new TimePickerDialog(this, onTimeSetListener, hour, minute, true);
         timePickerDialog.setTitle("Select Time");
@@ -82,14 +151,7 @@ public class AddTaskActivity extends AppCompatActivity {
         datePickerDialog = new DatePickerDialog(this, style, dateSetListener, year, month, day );
     }
 
-    private String getTodaysDate(){
-        Calendar cal = Calendar.getInstance();
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH);
-        month = month + 1;
-        int day = cal.get(Calendar.DAY_OF_MONTH);
-        return makeDateString(day, month, year);
-    }
+
 
     private String makeDateString(int day, int month, int year){
         return month + " " + day + " " + year;

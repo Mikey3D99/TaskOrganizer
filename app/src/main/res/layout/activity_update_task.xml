@@ -39,40 +39,29 @@
 
 
     <TextView
-        android:id="@+id/selectDateTime_input"
+        android:id="@+id/timeOfCreation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/select_finish_time_and_date"
+        android:text="Time of creation: "
         android:layout_marginTop="10dp"
         android:textSize="20sp">
     </TextView>
-    <Button
-        android:id="@+id/selectTime_input"
+
+    <TextView
+        android:id="@+id/timeOfExecution"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select time"
-        android:onClick="popTimeClicker"
+        android:text="Time of execution: "
         android:layout_marginTop="10dp"
-        >
+        android:textSize="20sp">
+    </TextView>
 
-    </Button>
-
-    <Button
-        android:id="@+id/datePickerButton_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Select date"
-        android:onClick="openDatePicker"
-        android:layout_marginTop="10dp"
-        >
-
-    </Button>
 
     <TextView
         android:id="@+id/addAttachment_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add an attachment"
+        android:text="Attachment: "
         android:layout_marginTop="10dp"
         android:textSize="20sp">
     </TextView>
@@ -94,6 +83,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Update Task"
+        android:textColor="@android:color/holo_green_light"
         android:onClick="openDatePicker"
         android:layout_marginTop="10dp"
 
@@ -105,6 +95,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Delete task"
+        android:textColor="@android:color/holo_red_dark"
         android:onClick="openDatePicker"
         android:layout_marginTop="10dp"
 
