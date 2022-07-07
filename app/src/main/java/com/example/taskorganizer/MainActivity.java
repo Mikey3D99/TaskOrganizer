@@ -109,13 +109,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void filterCategory(){
         ArrayList<TaskModel> filteredList = new ArrayList<>();
-        for(TaskModel task : myTasks){
 
-            System.out.println("OBECNA KATEGORIA "+ task.currentCategory);
-            System.out.println("KATEGORIA TASKA " + task.getCategory());
-            if(task.currentCategory.toLowerCase().equals(task.getCategory())
-            || task.currentCategory.equals("none")){
-                filteredList.add(task);
+        for(TaskModel task : myTasks){
+            if (task.currentCategory != null) {
+                System.out.println("OBECNA KATEGORIA "+ task.currentCategory);
+                System.out.println("KATEGORIA TASKA " + task.getCategory());
+                if(task.currentCategory.toLowerCase().equals(task.getCategory())
+                        || task.currentCategory.equals("none")){
+                    filteredList.add(task);
+                }
+
             }
         }
         //sort

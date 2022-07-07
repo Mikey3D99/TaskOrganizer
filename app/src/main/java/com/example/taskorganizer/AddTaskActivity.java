@@ -151,11 +151,9 @@ public class AddTaskActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AlarmReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
                 notificationTime.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY,
                 pendingIntent);
-
 
         Toast.makeText(this, "Notification Set!", Toast.LENGTH_SHORT).show();
     }

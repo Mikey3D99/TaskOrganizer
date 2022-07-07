@@ -23,7 +23,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentTitle("TaskOrganizer")
                 .setContentText("Task Finished!")
-                .setAutoCancel(true) // erase from notification tree
+                .setAutoCancel(false) // erase from notification tree
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pendingIntent);

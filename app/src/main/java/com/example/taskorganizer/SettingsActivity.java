@@ -132,6 +132,7 @@ public class SettingsActivity extends AppCompatActivity {
             if(!myTask.getFinished()){
                 //get exec time, convert to date, subtract user amount and set the alarm
                 String execTime = myTask.getTimeOfExecution();
+                System.out.println(subtractTime(execTime));
                 setAlarm(subtractTime(execTime));
             }
         }
