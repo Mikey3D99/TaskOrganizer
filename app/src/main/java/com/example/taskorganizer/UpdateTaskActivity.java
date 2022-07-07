@@ -118,6 +118,17 @@ public class UpdateTaskActivity extends AppCompatActivity {
         Toast.makeText(this, "Notification Set!", Toast.LENGTH_SHORT).show();
     }
 
+    private void cancelAlarm(){
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        if(alarmManager == null){
+            alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            alarmManager.cancel(pendingIntent);
+            Toast.makeText(this, "Alarm canceled!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void Retrieve(String path)
     {
         File imageFile = new File(Environment.getDataDirectory() + path);
@@ -130,7 +141,7 @@ public class UpdateTaskActivity extends AppCompatActivity {
 
         }
         else{
-            Toast.makeText(getApplicationContext(), "GOWNO" + Environment.getDataDirectory() + path, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),Environment.getDataDirectory() + path, Toast.LENGTH_SHORT).show();
         }
     }
 

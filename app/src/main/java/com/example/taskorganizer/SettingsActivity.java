@@ -2,8 +2,12 @@ package com.example.taskorganizer;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +20,8 @@ import android.widget.Toast;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -25,6 +31,8 @@ public class SettingsActivity extends AppCompatActivity {
     MyDatabaseHelper myDB;
     ArrayList<TaskModel> myTasks;
     ArrayList<String> myCategories;
+    private AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
         save = findViewById(R.id.setMinutesButton);
         save.setOnClickListener(view -> {
             Intent i = new Intent(SettingsActivity.this, MainActivity.class);
-            i.putExtra("minutes_before", minutesBefore.getText().toString().trim());
+            setReminders();
             startActivity(i);
             finish();
         });
@@ -89,6 +97,60 @@ public class SettingsActivity extends AppCompatActivity {
         this.categoryList.addView(scrollviewLinearLayout);
 
     }
+    void isTaskStatusFinished(TaskModel task){
+        Date dateNow = new Date();
+        int compare = dateNow.compareTo(task.execution);
+        if(compare > 0 || compare == 0){
+            task.setFinished(true);
+        }
+    }
+    private String convertCalendarToDate(Calendar calendar){
+        android.icu.text.SimpleDateFormat formatter = new android.icu.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = calendar.getTime();
+        return formatter.format(date);
+    }
+
+    //returns time minus minutes
+    private Calendar subtractTime(String time){
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new android.icu.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        try {
+            cal.setTime(sdf.parse(time));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        int minus = Integer.parseInt(minutesBefore.getText().toString().trim());
+        cal.add(Calendar.MINUTE, -1 * minus);
+        return cal;
+    }
+
+    private void setReminders(){
+        for(TaskModel myTask : this.myTasks){
+            isTaskStatusFinished(myTask);
+            System.out.println("CZEK  ___>>>> " +myTask.getFinished());
+
+            if(!myTask.getFinished()){
+                //get exec time, convert to date, subtract user amount and set the alarm
+                String execTime = myTask.getTimeOfExecution();
+                setAlarm(subtractTime(execTime));
+            }
+        }
+    }
+
+    private void setAlarm(Calendar notificationTime){
+
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                notificationTime.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY,
+                pendingIntent);
+
+
+        Toast.makeText(this, "Notification Set!", Toast.LENGTH_SHORT).show();
+    }
 
     private void updateCurrentCategoryForAll(String category){
         for(TaskModel myTask : this.myTasks){
@@ -97,18 +159,6 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
-        // Save UI state changes to the savedInstanceState.
-        // This bundle will be passed to onCreate if the process is
-        // killed and restarted.
-        savedInstanceState.putBoolean("MyBoolean", true);
-        savedInstanceState.putDouble("myDouble", 1.9);
-        savedInstanceState.putInt("MyInt", 1);
-        savedInstanceState.putString("MyString", "Welcome back to Android");
-        // etc.
-    }
 
     // Function to remove duplicates from an ArrayList
     public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list) {
